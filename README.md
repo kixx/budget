@@ -34,7 +34,7 @@ Application is running on port 8080
 
 ## Authors
 
-- Christian-Rolf Gruen <gruenc@gmail.com>
+- Christian-Rolf Gruen
 
 ## License
 
