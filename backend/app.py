@@ -6,13 +6,14 @@ import uuid
 # config
 DEBUG = True
 
-ORIGIN_IP = '94.130.179.105'
+ORIGIN_IP   = '94.130.179.105'
+ORIGIN_URL  = 'http://budget.bsdro.org:8080'
 
 app = Flask(__name__)
 app.config.from_object(__name__)
 
 # enable CORS
-CORS(app, resources={r'/api/*': {'origins': 'http://{}:8080*'.format(ORIGIN_IP)}})
+CORS(app, resources={ r'/api/*': {'origins': ORIGIN_URL} })
 
 BUDGET = [
   {

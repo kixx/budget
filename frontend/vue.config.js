@@ -1,5 +1,5 @@
 module.exports = {
   devServer: {
-    host: '94.130.179.105'
+    host: 'budget.bsdro.org'
   }
 };
