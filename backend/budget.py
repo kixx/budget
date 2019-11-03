@@ -2,24 +2,40 @@ from typing   import List, Dict, Optional
 from datetime import date, datetime, timedelta, time
 from decimal  import getcontext, Decimal
 
+import collections
+
+DailyPlanItem = collections.namedtuple('DailyPlanItem', 'budget cost')
+
 DateSpan = List[date]
 
-datetime_format = '%m.%d.%Y %H:%M:%S'
+datetime_format    = '%m.%d.%Y %H:%M:%S'
+monthly_key_format = '%Y-%m'
 
-class DailyItem:
+class DailyBudgetItem:
     """Budget details for a particular day"""
-    def __init__(self, time: time, budget: Decimal):
+    def __init__(self):
         self.items   = {}
         self.maximum = Decimal('-Infinity')
-        self.add(time, budget)
 
-    def add(self, time, budget) -> None:
+    def add(self, time: time, budget: Decimal) -> None:
         self.items[time] = budget
         if budget > self.maximum:
             self.maximum = budget
 
-class DailyBudget:
-    """Unrolled budget per days"""
+class DailyCostItem:
+    """Cost details for a particular day"""
+
+    def __init__(self):
+        self.items = {}
+        self.total = Decimal(0)
+
+    def add(self, time: time, cost: Decimal) -> None:
+        self.items[time] = cost
+        self.total += cost
+
+
+class DailyPlan:
+    """Unrolled budget and costs per days"""
     def __init__(self):
         self.days   = {}
         self.months = {}
@@ -29,21 +45,22 @@ class DailyBudget:
 
     def add_budget_item(self, dt: datetime, budget: Decimal) -> None:
         date = dt.date()
-        if date in self.days:
-            self.days[date].add(dt.time(), budget)
-        else:
-            self.days[date] = DailyItem(dt.time(), budget)
-        self._last_max = self.days[date].maximum
+        if date not in self.days:
+            self.days[date] = DailyPlanItem(budget = DailyBudgetItem(), cost = DailyCostItem())
+        self.days[date].budget.add(dt.time(), budget)
+        self._last_max = self.days[date].budget.maximum
 
     def add_day(self, date) -> None:
-        self.days[date] = DailyItem(time.fromisoformat('00:00:00'), self._last_max)
+        self.days[date] = DailyPlanItem(budget = DailyBudgetItem(), cost = DailyCostItem())
+        self.days[date].budget.add(time.fromisoformat('00:00:00'), self._last_max)
 
     def compute_month_totals(self) -> None:
         for day in self.days.keys():
-            month = day.strftime("%Y-%m")
+            month = day.strftime(monthly_key_format)
             if month not in self.months:
-                self.months[month] = 0
-            self.months[month] += self.days[day].maximum
+                self.months[month] = { 'budget': 0, 'costs': 0 }
+            self.months[month]['budget'] += self.days[day].budget.maximum
+
 
 class Budget:
     """Budget for a period"""
@@ -82,8 +99,8 @@ class Budget:
     def get_items_by_date(self, date) -> Dict:
         return { dt: self.items[dt] for dt in self.items.keys() if dt.date() == date }
 
-    def daily_budget(self) -> DailyBudget:
-        daily = DailyBudget()
+    def compute_daily_plan(self) -> DailyPlan:
+        daily = DailyPlan()
     
         day = None
         for dt in self.dt_iter:
@@ -103,10 +120,12 @@ class Budget:
 
         return daily
 
+
+
 class Simulator:
     """Simulate costs based on daily budgets"""
 
-    def __init__(self, daily: DailyBudget):
+    def __init__(self, daily: DailyPlan):
         self.daily   = daily
         self.costs   = {}
 

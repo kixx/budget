@@ -89,34 +89,37 @@ class TestBudget:
             items = budget.get_items_by_date(date.fromisoformat(budget_date))
             assert len(items.keys()) == item_count
 
-    def test_daily_budget(self, complex_item_dict):
+    def test_budget_items(self, complex_item_dict):
         budget = Budget.from_item_dict(complex_item_dict)
-        daily = budget.daily_budget()
+        daily = budget.compute_daily_plan()
         daily.compute_month_totals()
 
         assert len(daily.days.keys()) == 9
 
         long_day = daily.days[date.fromisoformat('2019-01-01')]
-        assert len(long_day.items) == 4
-        assert long_day.maximum == Decimal(7)
+        assert len(long_day.budget.items) == 4
+        assert long_day.budget.maximum == Decimal(7)
         
         before_next_change = daily.days[date.fromisoformat('2019-01-04')]
-        assert before_next_change.maximum == Decimal(7)
+        assert before_next_change.budget.maximum == Decimal(7)
         
         change_day = daily.days[date.fromisoformat('2019-01-05')]
-        assert len(change_day.items) == 1
-        assert change_day.maximum == Decimal(2)
+        assert len(change_day.budget.items) == 1
+        assert change_day.budget.maximum == Decimal(2)
 
         pause_day = daily.days[date.fromisoformat('2019-01-06')]
-        assert pause_day.maximum == Decimal(0)
+        assert pause_day.budget.maximum == Decimal(0)
 
         before_last = daily.days[date.fromisoformat('2019-01-08')]
-        assert before_last.maximum == Decimal(0)
+        assert before_last.budget.maximum == Decimal(0)
 
         last_day = daily.days[date.fromisoformat('2019-01-09')]
-        assert last_day.maximum == Decimal('100.5')
+        assert last_day.budget.maximum == Decimal('100.5')
 
-        pp.pprint(daily.months)
+        #pp.pprint(daily.months)
 
-        jan_budget = daily.months['2019-01']
+        jan_budget = daily.months['2019-01']['budget']
         assert jan_budget == Decimal('130.5')
+
+    def test_cost_items(self):
+        pass
