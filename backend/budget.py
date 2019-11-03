@@ -50,7 +50,7 @@ class DailyPlan:
         self.days[date].budget.add(dt.time(), budget)
         self._last_max = self.days[date].budget.maximum
 
-    def add_day(self, date) -> None:
+    def add_day(self, date: date) -> None:
         self.days[date] = DailyPlanItem(budget = DailyBudgetItem(), cost = DailyCostItem())
         self.days[date].budget.add(time.fromisoformat('00:00:00'), self._last_max)
 
