@@ -58,6 +58,7 @@ class DailyPlan:
 
     def get_daily_limit(self, dt: datetime) -> Decimal:
         budget = self.days[dt.date()].budget
+        cost   = self.days[dt.date()].cost
         matched_time = next((time for time in sorted(budget.items.keys()) if dt.time() >= time), None)
         if matched_time is None:
             prev_date = dt.date() - timedelta(days = 1)
@@ -65,7 +66,7 @@ class DailyPlan:
         else:
             cur_budget = budget.items[matched_time]
 
-        return cur_budget * DAILY_BUDGET_FACTOR
+        return cur_budget * DAILY_BUDGET_FACTOR - cost.total 
 
     def add_cost(self, dt: datetime, cost: Decimal) -> None:
         budget = self.days[dt.date()].cost.add(dt.time(), cost)
@@ -168,12 +169,12 @@ class Simulator:
 
             for dt in dts:
                 cost_limit = min(self.daily.get_daily_limit(dt), self.daily.get_monthly_limit(date))
-                print("Cost limit: " + str(cost_limit))
-                if cost_limit == 0:
+                #print("Cost limit: " + str(cost_limit))
+                if cost_limit <= 0:
                     cost = Decimal(0)
                 else:
                     cost = Decimal(randrange(0, int(cost_limit*100))/100)
-                print("Cost: " + str(cost))
+                #print("Cost: " + str(cost))
                 self.daily.add_cost(dt, cost)
 
 
