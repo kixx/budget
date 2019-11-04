@@ -1,6 +1,8 @@
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 
+from budget import Budget, Simulator
+
 import uuid
 
 # config
@@ -69,12 +71,29 @@ def one_budget(budget_id):
         response['message' ] = 'Budget item removed!'
     return jsonify(response)
 
+@app.route('/api/simulator', methods=['POST'])
+def run_simulation():
+    response = { 'status': 'success' }
+    budget = Budget.from_item_dict( format_budget() )
+    sim = Simulator(budget)
+    sim.generate_costs()
+
+    response['simulation'] = sim.get_summary()
+
+    return jsonify(response)
+
 def remove_budget(budget_id):
     for item in BUDGET:
         if item['id'] == budget_id:
             BUDGET.remove(item)
             return True
     return False
+
+def format_budget():
+    budget = {}
+    for item in BUDGET:
+        budget[item['datetime']] = item['budget']
+    return budget
 
 if __name__ == '__main__':
     app.run(host = ORIGIN_IP)
