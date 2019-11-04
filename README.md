@@ -43,5 +43,5 @@ This project is licensed under the GNU General Public License v3.0 - see the [LI
 
 ## See also
 
-[1](https://testdriven.io/blog/deploying-flask-to-heroku-with-docker-and-gitlab/)
-[2](https://testdriven.io/blog/developing-a-single-page-app-with-flask-and-vuejs/)
+- [Docker deployment](https://testdriven.io/blog/deploying-flask-to-heroku-with-docker-and-gitlab/)
+- [vue.js / Flask development](https://testdriven.io/blog/developing-a-single-page-app-with-flask-and-vuejs/)
