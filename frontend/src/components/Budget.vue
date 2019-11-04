@@ -81,6 +81,7 @@
     <b-modal ref="editBudgetModal"
             id="budget-update-modal"
             title="Update"
+            v-model="showEdit"
             hide-footer>
     <b-form @submit="onSubmitUpdate" @reset="onResetUpdate" class="w-100">
     <b-form-group id="form-datetime-edit-group"
@@ -168,6 +169,7 @@ export default {
       message: '',
       showMessage: false,
       showCosts: false,
+      showEdit: false,
       item: null,
       lang: 'en',
       format: 'MM.DD.YYYY hh:mm:ss',
@@ -220,6 +222,7 @@ export default {
     },
     editBudget(item) {
       this.editForm = item;
+      this.showEdit = true;
     },
     removeBudget(id) {
       const path = `${this.api_url}/budget/${id}`;
