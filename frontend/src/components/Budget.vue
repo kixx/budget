@@ -154,6 +154,7 @@ import Alert from './Alert.vue';
 export default {
   data() {
     return {
+      api_url: process.env.VUE_APP_API_URL,
       budget: [],
       costs: [],
       addBudgetForm: {
@@ -178,7 +179,7 @@ export default {
   },
   methods: {
     loadBudget() {
-      const path = 'http://94.130.179.105:5000/api/budget';
+      const path = `${this.api_url}/budget`;
       axios.get(path)
         .then((res) => {
           this.budget = res.data.budget;
@@ -189,7 +190,7 @@ export default {
         });
     },
     addBudget(payload) {
-      const path = 'http://94.130.179.105:5000/api/budget';
+      const path = `${this.api_url}/budget`;
       axios.post(path, payload)
         .then(() => {
           this.loadBudget();
@@ -204,7 +205,7 @@ export default {
         });
     },
     updateBudget(payload, id) {
-      const path = `http://94.130.179.105:5000/api/budget/${id}`;
+      const path = `${this.api_url}/budget/${id}`;
       axios.put(path, payload)
         .then(() => {
           this.loadBudget();
@@ -221,7 +222,7 @@ export default {
       this.editForm = item;
     },
     removeBudget(id) {
-      const path = `http://94.130.179.105:5000/api/budget/${id}`;
+      const path = `${this.api_url}/budget/${id}`;
       axios.delete(path)
         .then(() => {
           this.loadBudget();
@@ -235,7 +236,7 @@ export default {
         });
     },
     simulateCosts() {
-      const path = 'http://94.130.179.105:5000/api/simulator';
+      const path = `${this.api_url}/simulator`;
       axios.post(path)
         .then((res) => {
           this.costs = res.data.simulation;
