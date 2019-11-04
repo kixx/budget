@@ -1,6 +1,7 @@
 from typing   import List, Dict, Optional
 from datetime import date, datetime, timedelta, time
 from decimal  import getcontext, Decimal
+from random   import randint, randrange
 
 import collections
 
@@ -66,6 +67,9 @@ class DailyPlan:
 
         return cur_budget * DAILY_BUDGET_FACTOR
 
+    def add_cost(self, dt: datetime, cost: Decimal) -> None:
+        budget = self.days[dt.date()].cost.add(dt.time(), cost)
+        self.add_monthly_cost(dt, cost)
 
     def compute_month_totals(self) -> None:
         for day in self.days.keys():
@@ -145,7 +149,32 @@ class Budget:
 class Simulator:
     """Simulate costs based on daily budgets"""
 
-    def __init__(self, daily: DailyPlan):
-        self.daily   = daily
-        self.costs   = {}
+    def __init__(self, budget: Budget):
+        self.budget = budget
+        self.daily  = None 
+
+    def generate_costs(self) -> None:
+        self.daily = self.budget.compute_daily_plan()
+        self.daily.compute_month_totals()
+        dates = self.budget.get_dates()
+
+        for date in dates:
+            dts = []
+            cost_count = randint(0, 9)
+            for i in range(0,cost_count):
+                time_offset = timedelta( seconds = randrange(0, 86400) )
+                dt_midnight = datetime.combine(date, datetime.min.time())
+                dts.append(dt_midnight + time_offset)
+
+            for dt in dts:
+                cost_limit = min(self.daily.get_daily_limit(dt), self.daily.get_monthly_limit(date))
+                print("Cost limit: " + str(cost_limit))
+                if cost_limit == 0:
+                    cost = Decimal(0)
+                else:
+                    cost = Decimal(randrange(0, int(cost_limit*100))/100)
+                print("Cost: " + str(cost))
+                self.daily.add_cost(dt, cost)
+
+
 

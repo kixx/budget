@@ -1,7 +1,7 @@
 from decimal  import Decimal
 from datetime import date, datetime, time
 
-from budget   import Budget
+from budget   import Budget, Simulator
 
 import pytest
 import pprint
@@ -116,8 +116,6 @@ class TestBudget:
         last_day = daily.days[date.fromisoformat('2019-01-09')]
         assert last_day.budget.maximum == Decimal('100.5')
 
-        #pp.pprint(daily.months)
-
         jan_budget = daily.months['2019-01']['budget']
         assert jan_budget == Decimal('130.5')
 
@@ -143,4 +141,11 @@ class TestBudget:
         
         daily_limit = daily.get_daily_limit(datetime.fromisoformat('2019-01-05T13:00:00'))
         assert daily_limit == Decimal('4')
+
+    def test_simulator(self, complex_item_dict):
+        budget = Budget.from_item_dict(complex_item_dict)
+        sim = Simulator(budget)
+        sim.generate_costs()
+        for day in sim.daily.days.keys():
+            pp.pprint({ 'date': day.strftime("%d.%m.%Y") , 'max': sim.daily.days[day].budget.maximum, 'total': sim.daily.days[day].cost.total }) 
 
