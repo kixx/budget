@@ -1,6 +1,6 @@
 # budget
 
-A PoC app inspired by https://testdriven.io/blog/developing-a-single-page-app-with-flask-and-vuejs/
+A vue.js + Flask PoC app inspired by [testdriven.io](https://testdriven.io/blog/) articles
 
 ## Getting started
 
@@ -19,6 +19,7 @@ Install dependencies and run frontend
 ```sh
 cd frontend
 npm install
+echo "" > .env.development
 npm run serve
 ```
 
@@ -40,3 +41,7 @@ Application is running on port 8080
 
 This project is licensed under the GNU General Public License v3.0 - see the [LICENSE](LICENSE) file for details
 
+## See also
+
+[1](https://testdriven.io/blog/deploying-flask-to-heroku-with-docker-and-gitlab/)
+[2](https://testdriven.io/blog/developing-a-single-page-app-with-flask-and-vuejs/)
