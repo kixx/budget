@@ -73,7 +73,7 @@ class DailyPlan:
         budget = self.days[dt.date()].cost.add(dt.time(), cost)
         self.add_monthly_cost(dt, cost)
 
-    def compute_month_totals(self) -> None:
+    def compute_monthly_totals(self) -> None:
         for day in self.days.keys():
             month = day.strftime(MONTHLY_KEY_FORMAT)
             if month not in self.months:
@@ -144,6 +144,7 @@ class Budget:
 
             daily.add_budget_item(dt, self.items[dt])
 
+        daily.compute_monthly_totals()
         return daily
 
 
@@ -157,7 +158,6 @@ class Simulator:
 
     def generate_costs(self) -> None:
         self.daily = self.budget.compute_daily_plan()
-        self.daily.compute_month_totals()
         dates = self.budget.get_dates()
 
         for date in dates:
@@ -179,4 +179,5 @@ class Simulator:
                 self.daily.add_cost(dt, cost)
 
 
-
+    def get_summary(self) -> Dict:
+        pass

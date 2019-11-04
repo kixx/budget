@@ -92,7 +92,6 @@ class TestBudget:
     def test_budget_items(self, complex_item_dict):
         budget = Budget.from_item_dict(complex_item_dict)
         daily = budget.compute_daily_plan()
-        daily.compute_month_totals()
 
         assert len(daily.days.keys()) == 9
 
@@ -122,7 +121,6 @@ class TestBudget:
     def test_monthly_limits(self, complex_item_dict):
         budget = Budget.from_item_dict(complex_item_dict)
         daily = budget.compute_daily_plan()
-        daily.compute_month_totals()
         
         monthly_limit = daily.get_monthly_limit(date.fromisoformat('2019-01-09'))
         assert monthly_limit == Decimal('130.5')
@@ -134,7 +132,6 @@ class TestBudget:
     def test_daily_limits(self, complex_item_dict):
         budget = Budget.from_item_dict(complex_item_dict)
         daily = budget.compute_daily_plan()
-        daily.compute_month_totals()
         
         daily_limit = daily.get_daily_limit(datetime.fromisoformat('2019-01-05T08:00:00'))
         assert daily_limit == Decimal('14')
