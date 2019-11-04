@@ -1,6 +1,6 @@
 from typing   import List, Dict, Optional
 from datetime import date, datetime, timedelta, time
-from decimal  import getcontext, Decimal
+from decimal  import Decimal, ROUND_HALF_UP
 from random   import randint, randrange
 
 import collections
@@ -11,7 +11,8 @@ DateSpan = List[date]
 
 DATETIME_FORMAT     = '%m.%d.%Y %H:%M:%S'
 MONTHLY_KEY_FORMAT  = '%Y-%m'
-DAILY_BUDGET_FACTOR = Decimal(2)
+DAILY_BUDGET_FACTOR = 2
+COST_PRECISION      = '0.01'
 
 class DailyBudgetItem:
     """Budget details for a particular day"""
@@ -66,7 +67,7 @@ class DailyPlan:
         else:
             cur_budget = budget.items[matched_time]
 
-        return cur_budget * DAILY_BUDGET_FACTOR - cost.total 
+        return cur_budget * Decimal(DAILY_BUDGET_FACTOR) - cost.total 
 
     def add_cost(self, dt: datetime, cost: Decimal) -> None:
         budget = self.days[dt.date()].cost.add(dt.time(), cost)
@@ -173,7 +174,7 @@ class Simulator:
                 if cost_limit <= 0:
                     cost = Decimal(0)
                 else:
-                    cost = Decimal(randrange(0, int(cost_limit*100))/100)
+                    cost = Decimal(Decimal(randrange(0, int(cost_limit*100))/100).quantize(Decimal(COST_PRECISION), rounding=ROUND_HALF_UP))
                 #print("Cost: " + str(cost))
                 self.daily.add_cost(dt, cost)
 
