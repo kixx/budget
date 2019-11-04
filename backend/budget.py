@@ -180,4 +180,12 @@ class Simulator:
 
 
     def get_summary(self) -> Dict:
-        pass
+        summary = []
+        for day in self.daily.days.keys():
+            summary.append({
+                'date'  : day.strftime("%m.%d.%Y"),
+                'budget': self.daily.days[day].budget.maximum, 
+                'costs' : self.daily.days[day].cost.total,
+                })
+
+        return summary

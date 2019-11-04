@@ -143,6 +143,5 @@ class TestBudget:
         budget = Budget.from_item_dict(complex_item_dict)
         sim = Simulator(budget)
         sim.generate_costs()
-        for day in sim.daily.days.keys():
-            pp.pprint({ 'date': day.strftime("%d.%m.%Y") , 'max': sim.daily.days[day].budget.maximum, 'total': sim.daily.days[day].cost.total }) 
+        pp.pprint(sim.get_summary()) 
 
