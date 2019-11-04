@@ -7,6 +7,8 @@
           <alert :message="message" v-if="showMessage"></alert>
           <b-button id="add-budget" variant="success" size="sm"
              v-b-modal.budget-modal>Add Budget Line</b-button>
+          <b-button id="simulate" variant="info" size="sm" @click="onSimulate"
+             >Simulate costs</b-button>
         <table class="table table-hover">
           <thead>
             <tr>
@@ -110,11 +112,38 @@
         </b-button-group>
     </b-form>
     </b-modal>
+    <b-modal ref="simulationModal"
+            v-model="showCosts"
+            id="simulation-modal"
+            title="Cost Simulation"
+            ok-only>
+        <table class="table table-hover">
+          <thead>
+            <tr>
+              <th scope="col">Date</th>
+              <th scope="col">Budget</th>
+              <th scope="col">Costs</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-if="!costs.length" id="no-data"><td colspan="3">No data</td></tr>
+            <tr v-for="(item, index) in costs" :key="index">
+                <td>{{ item.date }}</td>
+                <td>{{ item.budget }}</td>
+                <td>{{ item.costs }}</td>
+            </tr>
+          </tbody>
+        </table>
+
+    </b-modal>
   </div>
 </template>
 <style>
 button#add-budget {
-  margin-bottom: 15px;
+  margin-bottom: 15px 10px;
+}
+button#simulate {
+  margin: 15px 10px;
 }
 </style>
 <script>
@@ -126,6 +155,7 @@ export default {
   data() {
     return {
       budget: [],
+      costs: [],
       addBudgetForm: {
         datetime: '',
         budget: '',
@@ -136,6 +166,7 @@ export default {
       },
       message: '',
       showMessage: false,
+      showCosts: false,
       item: null,
       lang: 'en',
       format: 'MM.DD.YYYY hh:mm:ss',
@@ -203,6 +234,18 @@ export default {
           this.loadBudget();
         });
     },
+    simulateCosts() {
+      const path = 'http://94.130.179.105:5000/api/simulator';
+      axios.post(path)
+        .then((res) => {
+          this.costs = res.data.simulation;
+          this.showCosts = true;
+        })
+        .catch((error) => {
+          // eslint-disable-next-line
+          console.log(error);
+        });
+    },
     onDeleteItem(item) {
       this.removeBudget(item.id);
     },
@@ -243,6 +286,10 @@ export default {
       this.$refs.editBudgetModal.hide();
       this.initForm();
       this.loadBudget();
+    },
+    onSimulate(evt) {
+      evt.preventDefault();
+      this.simulateCosts();
     },
   },
   created() {
