@@ -1,5 +1,5 @@
 from decimal  import Decimal
-from datetime import date
+from datetime import date, datetime, time
 
 from budget   import Budget
 
@@ -55,7 +55,7 @@ def complex_item_dict():
         '01.01.2019 00:30:00': 0,
         '01.01.2019 16:00:00': '1.35',
         '01.01.2019 22:00:00': '06.00',
-        '01.05.2019 12:00:00': 2,
+        '01.05.2019 13:00:00': 2,
         '01.06.2019 06:30:00': 0,
         '01.09.2019 00:00:00': '100.50',
     }
@@ -121,5 +121,26 @@ class TestBudget:
         jan_budget = daily.months['2019-01']['budget']
         assert jan_budget == Decimal('130.5')
 
-    def test_cost_items(self):
-        pass
+    def test_monthly_limits(self, complex_item_dict):
+        budget = Budget.from_item_dict(complex_item_dict)
+        daily = budget.compute_daily_plan()
+        daily.compute_month_totals()
+        
+        monthly_limit = daily.get_monthly_limit(date.fromisoformat('2019-01-09'))
+        assert monthly_limit == Decimal('130.5')
+
+        daily.add_monthly_cost(datetime.fromisoformat('2019-01-09T00:00:00'), Decimal('30.5'))
+        monthly_limit = daily.get_monthly_limit(date.fromisoformat('2019-01-09'))
+        assert monthly_limit == Decimal('100')
+
+    def test_daily_limits(self, complex_item_dict):
+        budget = Budget.from_item_dict(complex_item_dict)
+        daily = budget.compute_daily_plan()
+        daily.compute_month_totals()
+        
+        daily_limit = daily.get_daily_limit(datetime.fromisoformat('2019-01-05T08:00:00'))
+        assert daily_limit == Decimal('14')
+        
+        daily_limit = daily.get_daily_limit(datetime.fromisoformat('2019-01-05T13:00:00'))
+        assert daily_limit == Decimal('4')
+

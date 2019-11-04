@@ -8,8 +8,9 @@ DailyPlanItem = collections.namedtuple('DailyPlanItem', 'budget cost')
 
 DateSpan = List[date]
 
-datetime_format    = '%m.%d.%Y %H:%M:%S'
-monthly_key_format = '%Y-%m'
+DATETIME_FORMAT     = '%m.%d.%Y %H:%M:%S'
+MONTHLY_KEY_FORMAT  = '%Y-%m'
+DAILY_BUDGET_FACTOR = Decimal(2)
 
 class DailyBudgetItem:
     """Budget details for a particular day"""
@@ -54,13 +55,32 @@ class DailyPlan:
         self.days[date] = DailyPlanItem(budget = DailyBudgetItem(), cost = DailyCostItem())
         self.days[date].budget.add(time.fromisoformat('00:00:00'), self._last_max)
 
+    def get_daily_limit(self, dt: datetime) -> Decimal:
+        budget = self.days[dt.date()].budget
+        matched_time = next((time for time in sorted(budget.items.keys()) if dt.time() >= time), None)
+        if matched_time is None:
+            prev_date = dt.date() - timedelta(days = 1)
+            cur_budget = self.days[prev_date].budget.maximum
+        else:
+            cur_budget = budget.items[matched_time]
+
+        return cur_budget * DAILY_BUDGET_FACTOR
+
+
     def compute_month_totals(self) -> None:
         for day in self.days.keys():
-            month = day.strftime(monthly_key_format)
+            month = day.strftime(MONTHLY_KEY_FORMAT)
             if month not in self.months:
-                self.months[month] = { 'budget': 0, 'costs': 0 }
+                self.months[month] = { 'budget': Decimal(0), 'costs' : Decimal(0) }
             self.months[month]['budget'] += self.days[day].budget.maximum
 
+    def add_monthly_cost(self, dt: datetime, cost: Decimal) -> None:
+        month = dt.strftime(MONTHLY_KEY_FORMAT)
+        self.months[month]['costs'] += cost
+
+    def get_monthly_limit(self, dt: datetime) -> Decimal:
+        month = dt.strftime(MONTHLY_KEY_FORMAT)
+        return self.months[month]['budget'] - self.months[month]['costs']
 
 class Budget:
     """Budget for a period"""
@@ -73,7 +93,7 @@ class Budget:
     def from_item_dict(cls, item_dict: dict):
         obj = cls()
         for key, val in item_dict.items():
-            dt     = datetime.strptime(key, datetime_format)
+            dt     = datetime.strptime(key, DATETIME_FORMAT)
             budget = Decimal(val)
             budget.normalize()
             obj.items[dt] = budget
